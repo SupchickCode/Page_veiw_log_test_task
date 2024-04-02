@@ -1,0 +1,42 @@
+version: '3.8'
+
+name: page-view-log
+
+services:
+    page-view-log-app:
+        build:
+            context: .
+            target: php
+            args:
+                - APP_ENV=${APP_ENV}
+        environment:
+            - APP_ENV=${APP_ENV}
+            - CONTAINER_ROLE=app
+        working_dir: /var/www
+        volumes:
+          - ./:/var/www
+        ports:
+          - "8000:8000"
+        depends_on:
+            - page-view-log-mysql
+            - page-view-log-redis
+        entrypoint: ["_docker/app/entrypoint.sh"]
+
+    page-view-log-mysql:
+        image: mysql:8.0
+        ports:
+            - 3306:3306
+        environment:
+            - MYSQL_DATABASE=${DB_DATABASE}
+            - MYSQL_USER=${DB_USERNAME}
+            - MYSQL_PASSWORD=${DB_PASSWORD}
+            - MYSQL_ROOT_PASSWORD=${DB_PASSWORD}
+        volumes:
+          - db-data:/var/lib/mysql
+
+    page-view-log-redis:
+        image: redis:latest
+        ports:
+        - "6379:6379"
+volumes:
+  db-data: ~
